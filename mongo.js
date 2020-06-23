@@ -10,14 +10,14 @@ const client = new MongoClient(url);
 const createTransaction = async (req, res, next) => {
   const newTransaction = {
     account: req.body.account,
-    amount: req.body.amount,
+    amount: req.body.amount*1,
     type: req.body.type, //credit or debit
   };
 
   try {
     await client.connect();
     const db = client.db();
-    const result = db.collection('transactions').insertOne(newTransaction)
+    db.collection('transactions').insertOne(newTransaction)
   } catch (error) {
     return res.json({ message: " Could not store data." })
   };
@@ -36,7 +36,7 @@ const loginUsers = async (req, res, next) => {
   try {
     await client.connect();
     const db = client.db();
-    const result = db.collection('users').insertOne(newTransaction)
+    db.collection('users').insertOne(newTransaction)
   } catch (error) {
     return res.json({ message: " Could not store data." })
   };
@@ -50,14 +50,15 @@ const createUser = async (req, res, next) => {
   const newTransaction = {
     username: req.body.username,
     account: req.body.account,
-    balance: req.body.balance, //credit or debit
+    password: req.body.password,
+    balance: req.body.balance*1, 
     type: req.body.type //admin or user
   };
 
   try {
     await client.connect();
     const db = client.db();
-    const result = db.collection('users').insertOne(newTransaction)
+    db.collection('users').insertOne(newTransaction)
   } catch (error) {
     return res.json({ message: " Could not store data." })
   };
