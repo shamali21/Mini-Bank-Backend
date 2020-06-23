@@ -1,15 +1,13 @@
-const { request } = require('./app');
-// const { mongo } = require('mongoose');
-const { find } = require('./models/user');
-
 const MongoClient = require('mongodb').MongoClient;
 
 const url = 'mongodb+srv://shamali:1234@cluster0-u7jdg.mongodb.net/test?retryWrites=true&w=majority'
 const client = new MongoClient(url);
 
+
 const createTransaction = async (req, res, next) => {
   const newTransaction = {
-    account: req.body.account,
+    toAccount:req.body.toAccount,
+    fromAccount: req.body.fromAccount,
     amount: req.body.amount*1,
     type: req.body.type, //credit or debit
   };
@@ -26,25 +24,35 @@ const createTransaction = async (req, res, next) => {
   res.json(newTransaction);
 };
 
-const loginUsers = async (req, res, next) => {
-  const newTransaction = {
-    username: req.body.username,
-    account: req.body.account,
-    type: req.body.type //admin or user
-  };
+const login = async (req, res, next) => {
+  const userDets = {
+     username:req.body.username,
+     password:req.body.password  } ;
+
+  let existingUser;
 
   try {
     await client.connect();
     const db = client.db();
-    db.collection('users').insertOne(newTransaction)
-  } catch (error) {
-    return res.json({ message: " Could not store data." })
-  };
-  client.close();
+    existingUser = await adminHome.collection('users').findOne({ username: username })
+  } catch (err) {
+    const error = new HttpError(
+      'Logging in failed, please try again later.',
+      500
+    );
+    return next(error);
+  }
 
-  res.json(newTransaction);
+  if (!existingUser || existingUser.password !== password) {
+    const error = new HttpError(
+      'Invalid credentials, could not log you in.',
+      401
+    );
+    return next(error);
+  }
+
+  res.json({message:'Logged In!'});
 };
-
 
 const createUser = async (req, res, next) => {
   const newTransaction = {
@@ -69,8 +77,6 @@ const createUser = async (req, res, next) => {
 
 
 const getTransactions = async (req, res, next) => {
-  let transactions;
-
   try {
     await client.connect();
     const db = client.db();
@@ -202,14 +208,18 @@ const adminHome = async (req, res, next) => {
 
 const transferToAcc = async (req, res, next) => {
   const newTransaction = {
-    account: req.body.account,
-    amount: req.body.amount,
+    toAccount:req.body.account,
+    fromAccount: req.body.account,
+    amount: req.body.amount*1,
     };
 
   try {
     await client.connect();
     const db = client.db();
-    const result = db.collection('transactions').insertOne(newTransaction)
+     db.collection('transactions').insertOne(newTransaction)
+    //  db.collection('users').updateOne({ account: toAccount }, { $set: { balance: balance + amount } })
+    //  db.collection('users').updateOne({ account: fromAccount }, { $set: { balance: balance - amount } })
+
   } catch (error) {
     return res.json({ message: " Could not store data." })
   };
@@ -228,3 +238,4 @@ module.exports.createUser = createUser;
 module.exports.getuserbyName = getuserbyName;
 module.exports.getUserCount=getUserCount;
 module.exports.getUsers=getUsers;
+module.exports.login = login;

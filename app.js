@@ -43,6 +43,8 @@ app.get('/admin/users',mongo.getUsers);
 
 app.post('/user/transfer',mongo.transferToAcc);
 
+app.post('/login', mongo.login);
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
